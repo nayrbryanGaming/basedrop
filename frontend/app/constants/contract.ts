@@ -1,10 +1,56 @@
-export const ESCROW_ADDRESS = "0x5721864424BC13F0281F8C2995Fd28D87Db80904";
+export const ESCROW_ADDRESS = "0x37C5130124B350f4194fcCD3c9164354D4D787B2";
 
 export const ESCROW_ABI = [
     {
         "inputs": [],
         "stateMutability": "nonpayable",
         "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "owner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnableInvalidOwner",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "account",
+                "type": "address"
+            }
+        ],
+        "name": "OwnableUnauthorizedAccount",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "ReentrancyGuardReentrantCall",
+        "type": "error"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
     },
     {
         "anonymous": false,
@@ -64,6 +110,12 @@ export const ESCROW_ABI = [
                 "internalType": "uint256",
                 "name": "amount",
                 "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "expiry",
+                "type": "uint256"
             }
         ],
         "name": "PaymentCreated",
@@ -116,11 +168,29 @@ export const ESCROW_ABI = [
                 "internalType": "uint256",
                 "name": "amount",
                 "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "expiry",
+                "type": "uint256"
             }
         ],
         "name": "createPayment",
         "outputs": [],
         "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -149,6 +219,11 @@ export const ESCROW_ABI = [
                 "type": "uint256"
             },
             {
+                "internalType": "uint256",
+                "name": "expiry",
+                "type": "uint256"
+            },
+            {
                 "internalType": "bool",
                 "name": "claimed",
                 "type": "bool"
@@ -161,5 +236,42 @@ export const ESCROW_ABI = [
         ],
         "stateMutability": "view",
         "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
     }
 ] as const;
+
+export const SUPPORTED_TOKENS = [
+    {
+        symbol: "ETH",
+        name: "Ethereum",
+        address: "0x0000000000000000000000000000000000000000",
+        decimals: 18,
+        icon: "https://cryptologos.cc/logos/ethereum-eth-logo.svg"
+    },
+    {
+        symbol: "USDC",
+        name: "USD Coin",
+        address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+        decimals: 6,
+        icon: "https://cryptologos.cc/logos/usd-coin-usdc-logo.svg"
+    }
+];

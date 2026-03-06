@@ -8,12 +8,14 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /**
  * @title Escrow
  * @dev High-security escrow contract for BaseDrop to hold funds until claimed via payment ID.
+ * Now includes on-chain expiry enforcement.
  */
 contract Escrow is Ownable, ReentrancyGuard {
     struct Payment {
         address sender;
         address token; // address(0) for native ETH
         uint256 amount;
+        uint256 expiry; // 0 for no expiry
         bool claimed;
         bool cancelled;
     }
@@ -21,7 +23,7 @@ contract Escrow is Ownable, ReentrancyGuard {
     // Mapping from paymentId (hashed) to Payment details
     mapping(bytes32 => Payment) public payments;
 
-    event PaymentCreated(bytes32 indexed paymentId, address sender, address token, uint256 amount);
+    event PaymentCreated(bytes32 indexed paymentId, address sender, address token, uint256 amount, uint256 expiry);
     event PaymentClaimed(bytes32 indexed paymentId, address receiver);
     event PaymentCancelled(bytes32 indexed paymentId);
 
@@ -32,10 +34,12 @@ contract Escrow is Ownable, ReentrancyGuard {
      * @param paymentId The unique identifier for the payment (generated off-chain).
      * @param token The ERC20 token address, or address(0) for native ETH.
      * @param amount The amount of tokens/ETH to lock.
+     * @param expiry The timestamp after which the payment cannot be claimed (0 for no expiry).
      */
-    function createPayment(bytes32 paymentId, address token, uint256 amount) external payable nonReentrant {
+    function createPayment(bytes32 paymentId, address token, uint256 amount, uint256 expiry) external payable nonReentrant {
         require(payments[paymentId].sender == address(0), "Payment ID already exists");
         require(amount > 0, "Amount must be greater than zero");
+        require(expiry == 0 || expiry > block.timestamp, "Expiry must be in the future");
 
         if (token == address(0)) {
             require(msg.value == amount, "Incorrect ETH amount sent");
@@ -49,11 +53,12 @@ contract Escrow is Ownable, ReentrancyGuard {
             sender: msg.sender,
             token: token,
             amount: amount,
+            expiry: expiry,
             claimed: false,
             cancelled: false
         });
 
-        emit PaymentCreated(paymentId, msg.sender, token, amount);
+        emit PaymentCreated(paymentId, msg.sender, token, amount, expiry);
     }
 
     /**
@@ -66,6 +71,7 @@ contract Escrow is Ownable, ReentrancyGuard {
         require(payment.sender != address(0), "Payment does not exist");
         require(!payment.claimed, "Payment already claimed");
         require(!payment.cancelled, "Payment already cancelled");
+        require(payment.expiry == 0 || block.timestamp <= payment.expiry, "Payment expired");
 
         // Effects: Update state before transfer to prevent reentrancy (CEI pattern)
         payment.claimed = true;

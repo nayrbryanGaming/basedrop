@@ -198,13 +198,16 @@ export default function ClaimPage() {
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider mb-2">
                                     Payment Received
                                 </div>
-                                <h1 className="text-5xl font-black tracking-tight italic">
+                                <h1 className="text-5xl font-black tracking-tight italic flex items-center justify-center gap-3">
                                     {payment.amount} <span className="text-blue-500">{payment.token}</span>
                                 </h1>
-                                <p className="text-slate-400">Waiting for you to claim it on Base network</p>
+                                <p className="text-slate-400">Waiting for you to claim it on Base Sepolia</p>
                             </div>
 
-                            <div className="space-y-4 p-6 bg-slate-900/30 rounded-2xl border border-slate-800/50">
+                            <div className="space-y-4 p-6 bg-slate-900/30 rounded-2xl border border-slate-800/50 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-2 opacity-10">
+                                    <Download className="w-12 h-12 rotate-12" />
+                                </div>
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-slate-500">Sender</span>
                                     <span className="text-slate-300 font-mono italic">{payment.sender_wallet.slice(0, 6)}...{payment.sender_wallet.slice(-4)}</span>
@@ -215,6 +218,14 @@ export default function ClaimPage() {
                                         {payment.status.toUpperCase()}
                                     </span>
                                 </div>
+                                {payment.expires_at && (
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-slate-500">Expires</span>
+                                        <span className="text-amber-500/80 font-medium">
+                                            {new Date(payment.expires_at).toLocaleDateString()} {new Date(payment.expires_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
 
                             {!isConnected ? (

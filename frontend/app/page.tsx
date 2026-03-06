@@ -3,18 +3,19 @@
 import React, { useState } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { parseEther, keccak256, toHex, encodePacked } from 'viem';
+import { parseEther, parseUnits, keccak256, toHex, encodePacked } from 'viem';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Link as LinkIcon, CheckCircle, ArrowRight, Wallet, Info, Loader2, Calendar } from 'lucide-react';
+import { Send, Link as LinkIcon, CheckCircle, ArrowRight, Wallet, Info, Loader2, Calendar, ShieldCheck, Zap } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import confetti from 'canvas-confetti';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 import { QRCodeSVG } from 'qrcode.react';
-import { ESCROW_ADDRESS, ESCROW_ABI } from './constants/contract';
+import { ESCROW_ADDRESS, ESCROW_ABI, SUPPORTED_TOKENS } from './constants/contract';
 
 export default function HomePage() {
   const { address, isConnected } = useAccount();
@@ -24,6 +25,7 @@ export default function HomePage() {
   const [paymentId, setPaymentId] = useState<`0x${string}`>('0x');
   const [shareLink, setShareLink] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [txStatus, setTxStatus] = useState<'idle' | 'approving' | 'depositing' | 'syncing'>('idle');
   const [copied, setCopied] = useState(false);
   const [expiryDate, setExpiryDate] = useState('');
 
@@ -44,33 +46,63 @@ export default function HomePage() {
   const handleConfirm = async () => {
     if (!address || !amount) return;
     setIsSubmitting(true);
+    setTxStatus('approving');
 
     try {
-      // 1. Transaction to Escrow
+      const selectedToken = SUPPORTED_TOKENS.find(t => t.symbol === token);
+      if (!selectedToken) throw new Error("Unsupported token");
+
+      const expiryTimestamp = expiryDate ? Math.floor(new Date(expiryDate).getTime() / 1000) : 0;
+      const amountWei = parseUnits(amount, selectedToken.decimals);
+
+      // 1. ERC20 Approval if needed
+      if (selectedToken.address !== '0x0000000000000000000000000000000000000000') {
+        console.log("Approving token spend...");
+        await writeContractAsync({
+          address: selectedToken.address as `0x${string}`,
+          abi: [
+            {
+              "inputs": [
+                { "internalType": "address", "name": "spender", "type": "address" },
+                { "internalType": "uint256", "name": "amount", "type": "uint256" }
+              ],
+              "name": "approve",
+              "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            }
+          ],
+          functionName: 'approve',
+          args: [ESCROW_ADDRESS, amountWei],
+        });
+      }
+
+      // 2. Transaction to Escrow
+      setTxStatus('depositing');
       console.log("Creating payment on-chain...", paymentId);
 
-      const tx = await writeContractAsync({
+      await writeContractAsync({
         address: ESCROW_ADDRESS,
         abi: ESCROW_ABI,
         functionName: 'createPayment',
         args: [
           paymentId,
-          '0x0000000000000000000000000000000000000000', // ETH address sentinel
-          parseEther(amount)
+          selectedToken.address as `0x${string}`,
+          amountWei,
+          BigInt(expiryTimestamp)
         ],
-        value: parseEther(amount),
+        value: selectedToken.address === '0x0000000000000000000000000000000000000000' ? amountWei : 0n,
       });
 
-      console.log("Transaction sent:", tx);
-
-      // 2. Store in Backend
+      // 3. Store in Backend
+      setTxStatus('syncing');
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
       const response = await fetch(`${backendUrl}/api/payments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount,
-          token,
+          token: selectedToken.symbol,
           sender_wallet: address,
           payment_id: paymentId,
           expires_at: expiryDate ? new Date(expiryDate).toISOString() : null
@@ -79,6 +111,12 @@ export default function HomePage() {
 
       if (response.ok) {
         setShareLink(`${window.location.origin}/claim/${paymentId}`);
+        confetti({
+          particleCount: 150,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#3b82f6', '#8b5cf6', '#ffffff']
+        });
         setStep(3);
       } else {
         const errorData = await response.json();
@@ -89,6 +127,7 @@ export default function HomePage() {
       alert(error.message || "Failed to create payment link");
     } finally {
       setIsSubmitting(false);
+      setTxStatus('idle');
     }
   };
 
@@ -136,8 +175,21 @@ export default function HomePage() {
                       onChange={(e) => setAmount(e.target.value)}
                       className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl py-4 px-6 text-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-600"
                     />
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-slate-800 px-3 py-1 rounded-lg text-sm font-bold">
-                      {token}
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-1">
+                      {SUPPORTED_TOKENS.map((t) => (
+                        <button
+                          key={t.symbol}
+                          onClick={() => setToken(t.symbol)}
+                          className={cn(
+                            "px-3 py-1 rounded-lg text-sm font-bold transition-all",
+                            token === t.symbol
+                              ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40"
+                              : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                          )}
+                        >
+                          {t.symbol}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -179,45 +231,75 @@ export default function HomePage() {
 
           {step === 2 && (
             <motion.div
-              key="step2"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.05 }}
-              className="glass p-8 rounded-3xl space-y-8 text-center"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
             >
-              <div className="w-20 h-20 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto">
-                <Wallet className="text-blue-500 w-10 h-10" />
-              </div>
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold">Confirm Deposit</h2>
-                <p className="text-slate-400">You are about to lock <span className="text-white font-mono">{amount} {token}</span> into the escrow contract.</p>
+              <div className="text-center space-y-2">
+                <h2 className="text-3xl font-bold italic">Confirm Payment</h2>
+                <p className="text-slate-400">Locking funds on Base Sepolia</p>
               </div>
 
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setStep(1)}
-                  className="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-2xl transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleConfirm}
-                  disabled={isSubmitting}
-                  className="flex-3 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Processing...
-                    </>
-                  ) : (
-                    "Confirm & Lock Funds"
-                  )}
-                </button>
+              <div className="bg-slate-900/50 rounded-2xl p-6 border border-slate-800 space-y-4">
+                <div className="flex justify-between items-center pb-4 border-bottom border-slate-800">
+                  <span className="text-slate-400">Amount to send</span>
+                  <span className="text-2xl font-black text-blue-400">{amount} {token}</span>
+                </div>
+                {expiryDate && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-500">Expires on</span>
+                    <span className="text-slate-300">{new Date(expiryDate).toLocaleDateString()}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-500">Network</span>
+                  <span className="px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded-md text-xs font-bold ring-1 ring-blue-500/20">BASE SEPOLIA</span>
+                </div>
               </div>
+
+              <button
+                onClick={handleConfirm}
+                disabled={isSubmitting}
+                className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-500 py-4 rounded-2xl font-black text-xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-blue-900/20 group"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                    <span className="capitalize">{txStatus}...</span>
+                  </>
+                ) : (
+                  <>
+                    Confirm & Create Link
+                    <ShieldCheck className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                  </>
+                )}
+              </button>
+
+              <div className="flex flex-col gap-3 mt-4">
+                <div className={cn("flex items-center gap-2 text-xs", txStatus === 'approving' ? "text-blue-400 font-bold" : "text-slate-600")}>
+                  <div className={cn("w-2 h-2 rounded-full", txStatus === 'approving' ? "bg-blue-400 animate-pulse" : "bg-slate-800")} />
+                  1. Approve Tokens
+                </div>
+                <div className={cn("flex items-center gap-2 text-xs", txStatus === 'depositing' ? "text-blue-400 font-bold" : "text-slate-600")}>
+                  <div className={cn("w-2 h-2 rounded-full", txStatus === 'depositing' ? "bg-blue-400 animate-pulse" : "bg-slate-800")} />
+                  2. Deposit to Escrow
+                </div>
+                <div className={cn("flex items-center gap-2 text-xs", txStatus === 'syncing' ? "text-blue-400 font-bold" : "text-slate-600")}>
+                  <div className={cn("w-2 h-2 rounded-full", txStatus === 'syncing' ? "bg-blue-400 animate-pulse" : "bg-slate-800")} />
+                  3. Generate Link
+                </div>
+              </div>
+
+              <button
+                onClick={() => setStep(1)}
+                disabled={isSubmitting}
+                className="w-full text-slate-500 hover:text-slate-300 text-sm font-medium transition-colors"
+              >
+                Go Back
+              </button>
             </motion.div>
           )}
-
           {step === 3 && (
             <motion.div
               key="step3"
