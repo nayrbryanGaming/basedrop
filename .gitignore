@@ -1,0 +1,34 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# testing
+coverage/
+
+# production
+build/
+dist/
+.next/
+out/
+
+# misc
+.DS_Store
+*.pem
+*.log
+.env
+.env.*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# hardhat
+artifacts/
+cache/
+typechain/
+typechain-types/
