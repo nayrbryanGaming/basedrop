@@ -36,4 +36,4 @@ BaseDrop is a Web3 application on the Base network that allows users to send cry
 - Ensure all environment variables are set in Vercel.
 
 ## Contract Address (Base Sepolia)
-`0x939aE9D5E8B18266F500B7185F63f701DdD5`
+`0x8ba0247B88FfD97Eb4Dd2499ded6Ca39394A822b`
