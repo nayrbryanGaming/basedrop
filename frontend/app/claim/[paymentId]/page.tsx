@@ -7,6 +7,7 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagm
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, CheckCircle, AlertCircle, Loader2, Wallet, ArrowRight, Info } from 'lucide-react';
 import { parseEther } from 'viem';
+import confetti from 'canvas-confetti';
 
 import { ESCROW_ADDRESS, ESCROW_ABI } from '../../constants/contract';
 
@@ -16,6 +17,7 @@ export default function ClaimPage() {
     const [loading, setLoading] = useState(true);
     const [payment, setPayment] = useState<any>(null);
     const [status, setStatus] = useState<'idle' | 'claiming' | 'success' | 'error'>('idle');
+    const [errorType, setErrorType] = useState<'none' | 'notFound' | 'expired' | 'claimed' | 'generic'>('none');
     const [txHash, setTxHash] = useState('');
 
     const { writeContractAsync } = useWriteContract();
@@ -28,7 +30,22 @@ export default function ClaimPage() {
                 const response = await fetch(`${backendUrl}/api/payments/${paymentId}`);
                 if (response.ok) {
                     const data = await response.json();
+
+                    if (data.status === 'claimed') {
+                        setErrorType('claimed');
+                        setLoading(false);
+                        return;
+                    }
+
+                    if (data.expires_at && new Date(data.expires_at) < new Date()) {
+                        setErrorType('expired');
+                        setLoading(false);
+                        return;
+                    }
+
                     setPayment(data);
+                } else {
+                    setErrorType('notFound');
                 }
             } catch (error) {
                 console.error('Error fetching payment:', error);
@@ -71,6 +88,12 @@ export default function ClaimPage() {
 
             if (response.ok) {
                 setStatus('success');
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#3b82f6', '#8b5cf6', '#ffffff']
+                });
             } else {
                 console.error('Failed to update backend after claim');
                 setStatus('success'); // Still show success if contract call was successful
@@ -90,13 +113,33 @@ export default function ClaimPage() {
         );
     }
 
-    if (!payment) {
+    if (!payment || errorType !== 'none') {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-slate-950 text-center space-y-4">
-                <AlertCircle className="w-16 h-16 text-red-500" />
-                <h1 className="text-3xl font-bold">Payment Not Found</h1>
-                <p className="text-slate-400">This payment link may be invalid or has expired.</p>
-                <a href="/" className="text-blue-500 hover:underline">Go back home</a>
+                {errorType === 'expired' ? (
+                    <>
+                        <AlertCircle className="w-16 h-16 text-amber-500" />
+                        <h1 className="text-3xl font-bold italic uppercase">Link Expired</h1>
+                        <p className="text-slate-400 max-w-md">This payment link has reached its expiration date and the funds are no longer available for claiming.</p>
+                    </>
+                ) : errorType === 'claimed' ? (
+                    <>
+                        <CheckCircle className="w-16 h-16 text-blue-500" />
+                        <h1 className="text-3xl font-bold italic uppercase">Already Claimed</h1>
+                        <p className="text-slate-400 max-w-md">The funds associated with this link have already been successfully claimed.</p>
+                    </>
+                ) : (
+                    <>
+                        <AlertCircle className="w-16 h-16 text-red-500" />
+                        <h1 className="text-3xl font-bold italic uppercase">Payment Not Found</h1>
+                        <p className="text-slate-400 max-w-md">We couldn't find a valid payment for this link. It may have been cancelled or the ID is incorrect.</p>
+                    </>
+                )}
+                <div className="pt-6">
+                    <a href="/" className="px-8 py-3 bg-slate-900 border border-slate-800 rounded-2xl text-white hover:bg-slate-800 transition-all">
+                        Return Home
+                    </a>
+                </div>
             </div>
         );
     }

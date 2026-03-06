@@ -17,7 +17,7 @@ const queryClient = new QueryClient();
 const config = getDefaultConfig({
   appName: 'BaseDrop',
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
-  chains: [base, baseSepolia],
+  chains: [baseSepolia, base],
   ssr: true,
   transports: {
     [base.id]: http(),

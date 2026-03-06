@@ -11,7 +11,17 @@ const port = process.env.PORT || 3001;
 // Supabase Setup
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+
+let supabase: any = null;
+if (supabaseUrl && supabaseKey) {
+    try {
+        supabase = createClient(supabaseUrl, supabaseKey);
+    } catch (err) {
+        console.error("Failed to initialize Supabase:", err);
+    }
+} else {
+    console.warn("⚠️ SUPABASE_URL or SUPABASE_ANON_KEY is missing. Backend will return 500s for DB requests.");
+}
 
 app.use(cors({
     origin: [
@@ -44,6 +54,7 @@ app.post('/api/payments', async (req, res) => {
                 amount,
                 token,
                 sender_wallet,
+                expires_at: req.body.expires_at || null,
                 status: 'unclaimed'
             }
         ]);
@@ -58,6 +69,8 @@ app.post('/api/payments', async (req, res) => {
 // Get Payment Details
 app.get('/api/payments/:payment_id', async (req, res) => {
     const { payment_id } = req.params;
+
+    if (!supabase) return res.status(500).json({ error: 'Database not configured' });
 
     const { data, error } = await supabase
         .from('payments')
@@ -76,6 +89,8 @@ app.get('/api/payments/:payment_id', async (req, res) => {
 app.post('/api/payments/:payment_id/claim', async (req, res) => {
     const { payment_id } = req.params;
     const { receiver_wallet, tx_hash } = req.body;
+
+    if (!supabase) return res.status(500).json({ error: 'Database not configured' });
 
     const { data, error } = await supabase
         .from('payments')
@@ -96,3 +111,5 @@ app.post('/api/payments/:payment_id/claim', async (req, res) => {
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`);
 });
+
+export default app;

@@ -5,7 +5,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther, keccak256, toHex, encodePacked } from 'viem';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Link as LinkIcon, CheckCircle, ArrowRight, Wallet, Info, Loader2 } from 'lucide-react';
+import { Send, Link as LinkIcon, CheckCircle, ArrowRight, Wallet, Info, Loader2, Calendar } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -13,6 +13,7 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+import { QRCodeSVG } from 'qrcode.react';
 import { ESCROW_ADDRESS, ESCROW_ABI } from './constants/contract';
 
 export default function HomePage() {
@@ -23,6 +24,8 @@ export default function HomePage() {
   const [paymentId, setPaymentId] = useState<`0x${string}`>('0x');
   const [shareLink, setShareLink] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [expiryDate, setExpiryDate] = useState('');
 
   const { writeContractAsync } = useWriteContract();
 
@@ -70,6 +73,7 @@ export default function HomePage() {
           token,
           sender_wallet: address,
           payment_id: paymentId,
+          expires_at: expiryDate ? new Date(expiryDate).toISOString() : null
         }),
       });
 
@@ -135,6 +139,20 @@ export default function HomePage() {
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-slate-800 px-3 py-1 rounded-lg text-sm font-bold">
                       {token}
                     </div>
+                  </div>
+                </div>
+
+                {/* Expiry Input */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-400 ml-1">Expiry (Optional)</label>
+                  <div className="relative group">
+                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
+                    <input
+                      type="datetime-local"
+                      value={expiryDate}
+                      onChange={(e) => setExpiryDate(e.target.value)}
+                      className="w-full bg-slate-900/50 border border-slate-800 focus:border-blue-500/50 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none [color-scheme:dark]"
+                    />
                   </div>
                 </div>
 
@@ -215,21 +233,54 @@ export default function HomePage() {
                 <p className="text-slate-400">Share this link with the recipient. They can claim the funds instantly.</p>
               </div>
 
-              <div className="relative group">
-                <input
-                  readOnly
-                  value={shareLink}
-                  className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl py-4 pl-6 pr-14 text-sm font-mono focus:outline-none"
-                />
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(shareLink);
-                    alert('Copied to clipboard!');
-                  }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all"
-                >
-                  <LinkIcon className="w-5 h-5 text-blue-400" />
-                </button>
+              <div className="flex flex-col items-center gap-6">
+                <div className="p-4 bg-white rounded-2xl shadow-2xl shadow-blue-500/20">
+                  <QRCodeSVG
+                    value={shareLink}
+                    size={200}
+                    level="H"
+                    includeMargin={true}
+                    imageSettings={{
+                      src: "https://base.org/images/base-logo.svg",
+                      x: undefined,
+                      y: undefined,
+                      height: 40,
+                      width: 40,
+                      excavate: true,
+                    }}
+                  />
+                </div>
+
+                <div className="w-full relative group">
+                  <input
+                    readOnly
+                    value={shareLink}
+                    className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl py-4 pl-6 pr-14 text-sm font-mono focus:outline-none"
+                  />
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(shareLink);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all"
+                  >
+                    {copied ? (
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                    ) : (
+                      <LinkIcon className="w-5 h-5 text-blue-400" />
+                    )}
+                  </button>
+                  {copied && (
+                    <motion.span
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="absolute -top-8 right-0 text-xs text-green-500 font-bold"
+                    >
+                      Copied!
+                    </motion.span>
+                  )}
+                </div>
               </div>
 
               <button

@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS public.payments (
     receiver_wallet TEXT,
     status TEXT DEFAULT 'unclaimed', -- unclaimed, claimed, cancelled
     tx_hash TEXT,
+    expires_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
