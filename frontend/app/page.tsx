@@ -64,7 +64,7 @@ export default function HomePage() {
       console.log("Transaction sent:", tx);
 
       // 2. Store in Backend
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
       const response = await fetch(`${backendUrl}/api/payments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

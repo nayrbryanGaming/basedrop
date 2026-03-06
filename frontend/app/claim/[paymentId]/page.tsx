@@ -26,7 +26,7 @@ export default function ClaimPage() {
         const fetchPayment = async () => {
             try {
                 // Point to your local or deployed backend
-                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
                 const response = await fetch(`${backendUrl}/api/payments/${paymentId}`);
                 if (response.ok) {
                     const data = await response.json();
@@ -76,7 +76,7 @@ export default function ClaimPage() {
             setTxHash(tx);
 
             // 2. Update Backend
-            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
+            const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
             const response = await fetch(`${backendUrl}/api/payments/${paymentId}/claim`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
