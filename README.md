@@ -211,22 +211,42 @@ Claim payment
 
 # Smart Contract Overview
 
-The escrow contract manages payment deposits and claims.
+The escrow contract manages payment deposits and claims with high security.
 
 Core functions:
 
-```
-createPayment(paymentId, token, amount)
-claimPayment(paymentId)
+```solidity
+createPayment(paymentId, token, amount, expiry)
+claimPayment(paymentId, receiver)
 cancelPayment(paymentId)
 ```
 
-Security checks:
+# Advanced Security & Architecture
 
-* prevent double claims
-* validate sender ownership
-* track payment status
-* emit events for each transaction
+BaseDrop is designed with a **"Security First"** mindset, adhering to Ethereum best practices:
+
+### 1. Checks-Effects-Interactions (CEI) Pattern
+All state changes occur *before* external transfers. This fundamentally prevents reentrancy attacks.
+
+### 2. On-Chain Expiry Enforcement
+Unlike offshore payment links, BaseDrop enforces expiration directly in the smart contract. If a link expires, the funds are locked from being claimed, ensuring the sender can safely reclaim them.
+
+### 3. ReentrancyGuard
+Utilizes OpenZeppelin's `ReentrancyGuard` on all state-changing functions to prevent recursive call exploits.
+
+### 4. Deterministic Payment IDs
+Payment IDs are generated using `keccak256` hashing, ensuring unique, non-colliding identifiers for every transaction.
+
+### 5. Multi-Token Safety
+Supports both Native ETH and ERC20 tokens (like USDC) with strict validation of amounts and safe transfer patterns.
+
+---
+
+# Pro UX Features
+
+* **Real-time Tx Tracking**: The UI monitors Ethereum events locally to show exact progress (Approving -> Depositing -> Syncing).
+* **Luxury Animations**: Built with Framer Motion for a premium, high-converting experience.
+* **Responsive Design**: Designed for both desktop and mobile "Claim links" sent via Telegram/WhatsApp.
 
 ---
 
