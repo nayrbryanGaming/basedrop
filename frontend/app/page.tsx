@@ -305,9 +305,11 @@ export default function HomePage() {
               key="step3"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass p-8 rounded-3xl space-y-8 text-center"
+              className="glass p-8 rounded-3xl space-y-8 text-center relative overflow-hidden"
             >
-              <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto">
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-green-500/10 rounded-full blur-2xl" />
+
+              <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto ring-1 ring-green-500/20">
                 <CheckCircle className="text-green-500 w-10 h-10" />
               </div>
               <div className="space-y-2">
@@ -316,18 +318,18 @@ export default function HomePage() {
               </div>
 
               <div className="flex flex-col items-center gap-6">
-                <div className="p-4 bg-white rounded-2xl shadow-2xl shadow-blue-500/20">
+                <div className="p-4 bg-white rounded-3xl shadow-2xl shadow-blue-500/20 ring-1 ring-slate-200">
                   <QRCodeSVG
                     value={shareLink}
-                    size={200}
+                    size={180}
                     level="H"
                     includeMargin={true}
                     imageSettings={{
                       src: "https://base.org/images/base-logo.svg",
                       x: undefined,
                       y: undefined,
-                      height: 40,
-                      width: 40,
+                      height: 36,
+                      width: 36,
                       excavate: true,
                     }}
                   />
@@ -337,7 +339,7 @@ export default function HomePage() {
                   <input
                     readOnly
                     value={shareLink}
-                    className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl py-4 pl-6 pr-14 text-sm font-mono focus:outline-none"
+                    className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl py-4 pl-6 pr-14 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
                   />
                   <button
                     onClick={() => {
@@ -345,7 +347,7 @@ export default function HomePage() {
                       setCopied(true);
                       setTimeout(() => setCopied(false), 2000);
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all active:scale-95"
                   >
                     {copied ? (
                       <CheckCircle className="w-5 h-5 text-green-500" />
@@ -357,11 +359,30 @@ export default function HomePage() {
                     <motion.span
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="absolute -top-8 right-0 text-xs text-green-500 font-bold"
+                      className="absolute -top-8 right-0 text-xs text-green-400 font-bold"
                     >
-                      Copied!
+                      Link Copied!
                     </motion.span>
                   )}
+                </div>
+
+                <div className="flex gap-3 w-full">
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent("I sent you crypto via BaseDrop! Claim it here: " + shareLink)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-3 bg-green-600/10 hover:bg-green-600/20 border border-green-500/20 rounded-2xl text-green-400 text-sm font-bold transition-all flex items-center justify-center gap-2"
+                  >
+                    WhatsApp
+                  </a>
+                  <a
+                    href={`https://t.me/share/url?url=${encodeURIComponent(shareLink)}&text=${encodeURIComponent("I sent you crypto via BaseDrop! Claim it here.")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 py-3 bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/20 rounded-2xl text-blue-400 text-sm font-bold transition-all flex items-center justify-center gap-2"
+                  >
+                    Telegram
+                  </a>
                 </div>
               </div>
 
@@ -370,8 +391,9 @@ export default function HomePage() {
                   setStep(1);
                   setAmount('');
                 }}
-                className="w-full py-4 text-slate-400 hover:text-white transition-all text-sm font-medium"
+                className="w-full py-4 text-slate-500 hover:text-white transition-all text-sm font-medium flex items-center justify-center gap-2"
               >
+                <Zap className="w-4 h-4" />
                 Create another payment
               </button>
             </motion.div>
@@ -380,13 +402,20 @@ export default function HomePage() {
       </main>
 
       {/* Footer Info */}
-      <footer className="absolute bottom-6 flex items-center gap-8 text-slate-500 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          Base Mainnet
+      <footer className="absolute bottom-6 flex flex-col items-center gap-4 z-10 w-full px-6">
+        <div className="flex items-center gap-8 text-slate-500 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+            Base Sepolia
+          </div>
+          <div className="hover:text-slate-300 cursor-help transition-all underline decoration-slate-800">How it works</div>
+          <div className="hover:text-slate-300 cursor-pointer transition-all underline decoration-slate-800">Security</div>
         </div>
-        <div className="hover:text-slate-300 cursor-help transition-all underline decoration-slate-800">How it works</div>
-        <div className="hover:text-slate-300 cursor-pointer transition-all underline decoration-slate-800">Security</div>
+
+        <div className="flex items-center gap-3 py-2 px-4 bg-slate-900/40 rounded-full border border-slate-800/50 backdrop-blur-sm">
+          <span className="text-[10px] uppercase tracking-widest font-bold text-slate-500">Powered by</span>
+          <img src="https://base.org/images/base-logo.svg" alt="Base Logo" className="w-16 h-4 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-pointer" />
+        </div>
       </footer>
     </div>
   );

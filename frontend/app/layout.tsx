@@ -35,6 +35,10 @@ export const metadata: Metadata = {
   },
   viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   themeColor: "#0f172a",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  }
 };
 
 export default function RootLayout({

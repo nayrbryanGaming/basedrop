@@ -16,19 +16,16 @@ let supabase: any = null;
 if (supabaseUrl && supabaseKey) {
     try {
         supabase = createClient(supabaseUrl, supabaseKey);
+        console.log("✅ Supabase initialized successfully");
     } catch (err) {
-        console.error("Failed to initialize Supabase:", err);
+        console.error("❌ Failed to initialize Supabase:", err);
     }
 } else {
-    console.warn("⚠️ SUPABASE_URL or SUPABASE_ANON_KEY is missing. Backend will return 500s for DB requests.");
+    console.warn("⚠️ SUPABASE_URL or SUPABASE_ANON_KEY is missing. Backend will operate in mock mode (no persistence).");
 }
 
 app.use(cors({
-    origin: [
-        'http://localhost:3000',
-        'https://basedrop.vercel.app',
-        /\.vercel\.app$/ // Allow all Vercel previews
-    ],
+    origin: '*', // For development, we'll restrict it in production Vercel settings if needed
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
@@ -36,6 +33,14 @@ app.use(express.json());
 
 app.get('/', (req, res) => {
     res.send('BaseDrop Backend is running');
+});
+
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        database: supabase ? 'connected' : 'missing_config',
+        network: 'Base Sepolia'
+    });
 });
 
 // Create Payment Link
