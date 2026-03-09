@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchChain, useBalance } from 'wagmi';
 import { baseSepolia } from 'wagmi/chains';
-import { parseEther, parseUnits, keccak256, toHex } from 'viem';
+import { parseEther, parseUnits, keccak256, toHex, formatUnits } from 'viem';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Link as LinkIcon, CheckCircle, AlertCircle, ArrowRight, Wallet, Info, Loader2, Calendar, ShieldCheck, Zap, ExternalLink, Copy, Share2 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
@@ -44,7 +44,9 @@ export default function HomePage() {
 
   const selectedBalance = token === 'ETH' ? ethBalance : usdcBalance;
   const selectedDecimals = SUPPORTED_TOKENS.find(t => t.symbol === token)?.decimals ?? 18;
-  const balanceNum = selectedBalance ? parseFloat(selectedBalance.formatted) : null;
+  const balanceNum = selectedBalance?.value != null
+    ? parseFloat(formatUnits(selectedBalance.value, selectedBalance.decimals ?? selectedDecimals))
+    : null;
   const isInsufficient = balanceNum !== null && amount !== '' && parseFloat(amount) > balanceNum;
 
   const fetchMyPayments = React.useCallback(async () => {
@@ -286,7 +288,9 @@ export default function HomePage() {
                       <div className="flex items-center gap-4">
                         {[ethBalance, usdcBalance].map((bal, i) => {
                           const sym = i === 0 ? 'ETH' : 'USDC';
-                          const val = bal ? parseFloat(bal.formatted).toFixed(i === 0 ? 4 : 2) : '—';
+                          const dec = i === 0 ? 18 : 6;
+                          const num = bal?.value != null ? parseFloat(formatUnits(bal.value, bal.decimals ?? dec)) : null;
+                          const val = num !== null ? num.toFixed(i === 0 ? 4 : 2) : '—';
                           const isActive = token === sym;
                           return (
                             <button key={sym} onClick={() => setToken(sym)} className={cn("flex items-center gap-1.5 transition-all", isActive ? "opacity-100" : "opacity-40 hover:opacity-70")}>
