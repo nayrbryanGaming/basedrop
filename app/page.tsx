@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchChain, useBalance } from 'wagmi';
+import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchChain, useBalance, useReadContract } from 'wagmi';
 import { baseSepolia } from 'wagmi/chains';
-import { parseEther, parseUnits, keccak256, toHex, formatUnits } from 'viem';
+import { parseEther, parseUnits, keccak256, toHex, formatUnits, erc20Abi } from 'viem';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Link as LinkIcon, CheckCircle, AlertCircle, ArrowRight, Wallet, Info, Loader2, Calendar, ShieldCheck, Zap, ExternalLink, Copy, Share2 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
@@ -40,13 +40,20 @@ export default function HomePage() {
 
   const usdcToken = SUPPORTED_TOKENS.find(t => t.symbol === 'USDC')!;
   const { data: ethBalance } = useBalance({ address, chainId: baseSepolia.id });
-  const { data: usdcBalance } = useBalance({ address, token: usdcToken.address as `0x${string}`, chainId: baseSepolia.id });
+  const { data: usdcRaw } = useReadContract({
+    address: usdcToken.address as `0x${string}`,
+    abi: erc20Abi,
+    functionName: 'balanceOf',
+    args: [address!],
+    chainId: baseSepolia.id,
+    query: { enabled: !!address },
+  });
+  const usdcBalanceObj = usdcRaw != null ? { value: usdcRaw as bigint, decimals: 6 } : null;
 
-  const selectedBalance = token === 'ETH' ? ethBalance : usdcBalance;
   const selectedDecimals = SUPPORTED_TOKENS.find(t => t.symbol === token)?.decimals ?? 18;
-  const balanceNum = selectedBalance?.value != null
-    ? parseFloat(formatUnits(selectedBalance.value, selectedBalance.decimals ?? selectedDecimals))
-    : null;
+  const balanceNum = token === 'ETH'
+    ? (ethBalance?.value != null ? parseFloat(formatUnits(ethBalance.value, 18)) : null)
+    : (usdcRaw != null ? parseFloat(formatUnits(usdcRaw as bigint, 6)) : null);
   const isInsufficient = balanceNum !== null && amount !== '' && parseFloat(amount) > balanceNum;
 
   const fetchMyPayments = React.useCallback(async () => {
@@ -286,7 +293,7 @@ export default function HomePage() {
                   {isConnected && isCorrectChain && (
                     <div className="flex items-center justify-between px-2">
                       <div className="flex items-center gap-4">
-                        {[ethBalance, usdcBalance].map((bal, i) => {
+                        {[ethBalance, usdcBalanceObj].map((bal, i) => {
                           const sym = i === 0 ? 'ETH' : 'USDC';
                           const dec = i === 0 ? 18 : 6;
                           const num = bal?.value != null ? parseFloat(formatUnits(bal.value, bal.decimals ?? dec)) : null;
