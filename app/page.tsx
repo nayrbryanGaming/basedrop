@@ -220,7 +220,7 @@ export default function HomePage() {
             <Send className="text-white w-5 h-5 -rotate-12" />
           </div>
           <span className="text-2xl font-black tracking-tighter">BASE<span className="text-blue-500">DROP</span></span>
-          <span className="hidden sm:inline-flex px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-[9px] font-black uppercase tracking-widest text-amber-400">Base Sepolia</span>
+                <span className="hidden sm:inline-flex px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-[9px] font-black uppercase tracking-widest text-blue-400">Testnet</span>
         </motion.div>
         <ConnectButton showBalance={false} chainStatus="icon" accountStatus="avatar" />
       </nav>
@@ -334,7 +334,7 @@ export default function HomePage() {
                     <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center shrink-0">
                       <Wallet className="text-blue-400 w-6 h-6" />
                     </div>
-                    <p className="text-sm font-medium text-blue-200/70">Connect your wallet to generate a secure 101% perfected payment link.</p>
+                    <p className="text-sm font-medium text-blue-200/70">Connect your wallet to lock funds and generate a shareable payment link.</p>
                   </div>
                 ) : !isCorrectChain ? (
                   <button
@@ -359,7 +359,7 @@ export default function HomePage() {
               {/* Badge */}
               <div className="absolute -bottom-4 -right-4 bg-green-500/10 border border-green-500/20 backdrop-blur-xl px-4 py-2 rounded-full flex items-center gap-2 shadow-2xl">
                 <ShieldCheck className="w-4 h-4 text-green-400" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-green-400">Audited Protocol v1.1</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-green-400">Non-Custodial Escrow</span>
               </div>
             </motion.div>
           )}
@@ -374,7 +374,7 @@ export default function HomePage() {
             >
               <div className="text-center space-y-2">
                 <h2 className="text-3xl font-black tracking-tight leading-none italic">Review & Confirm</h2>
-                <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">On-Chain Settlement Process</p>
+                <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Review before signing</p>
               </div>
 
               <div className="bg-slate-900/80 rounded-4xl p-8 border border-white/5 space-y-6 relative overflow-hidden">
@@ -422,7 +422,7 @@ export default function HomePage() {
               <div className="space-y-4">
                 {[
                   { id: 'approving', label: '1. ERC20 Authorization', desc: 'Secure spending permission' },
-                  { id: 'depositing', label: '2. On-Chain Deposit', desc: 'Locking funds in Escrow' },
+                  { id: 'depositing', label: '2. Locking Funds', desc: 'Funds held in escrow contract' },
                   { id: 'syncing', label: '3. Link Generation', desc: 'Finalizing shared protocol' }
                 ].map((s, idx) => (
                   <div key={s.id} className={cn(
@@ -464,8 +464,8 @@ export default function HomePage() {
               </motion.div>
 
               <div className="space-y-2">
-                <h2 className="text-4xl font-black tracking-tight leading-none">Victory!</h2>
-                <p className="text-slate-400 font-medium">Your link is live on the Base 101% Perfected protocol.</p>
+                <h2 className="text-4xl font-black tracking-tight leading-none">Payment Created</h2>
+                <p className="text-slate-400 font-medium">Your payment link is live. Share it with the recipient to release funds.</p>
               </div>
 
               <div className="flex flex-col items-center gap-8">
@@ -507,7 +507,7 @@ export default function HomePage() {
               </div>
 
               <button onClick={() => { setStep(1); setAmount(''); }} className="text-slate-500 hover:text-white transition-all text-[10px] font-black uppercase tracking-[0.3em] flex items-center justify-center gap-3">
-                <Zap className="w-3 h-3 fill-current" /> Initialize New Flow
+                New Payment
               </button>
             </motion.div>
           )}
@@ -597,7 +597,7 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-4 pointer-events-auto opacity-40 hover:opacity-100 transition-opacity">
-            <span className="text-[8px] font-black uppercase tracking-[0.4em] text-slate-600">BaseDrop v1.0.0 · Base Sepolia Testnet</span>
+                <span className="text-[8px] font-black uppercase tracking-[0.4em] text-slate-600">BaseDrop · Base Sepolia</span>
             <div className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded-full">
               <span className="text-[8px] font-black uppercase tracking-widest text-blue-400">TESTNET</span>
             </div>

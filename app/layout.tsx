@@ -7,13 +7,13 @@ const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 const outfit = Outfit({ subsets: ["latin"], variable: '--font-outfit' });
 
 export const metadata: Metadata = {
-  title: "BaseDrop | 101% Perfected Crypto Links",
-  description: "The gold standard for crypto payment links on Base. Send USDC and ETH with absolute precision and world-class security.",
-  keywords: ["Base", "Web3 architect", "USDC", "Ethereum", "Payment Link", "Escrow"],
-  authors: [{ name: "Antigravity Architect" }],
+  title: "BaseDrop | Crypto Payment Links on Base",
+  description: "Lock ETH or USDC in a smart contract escrow and share a claimable link. No wallet address needed on the recipient side.",
+  keywords: ["Base", "Web3", "USDC", "ETH", "Payment Link", "Escrow", "Crypto"],
+  authors: [{ name: "BaseDrop" }],
   openGraph: {
-    title: "BaseDrop | Ultimate Crypto Experience",
-    description: "Send cryptocurrency on Base as easily as a text message. Secure, audited, and optimized.",
+    title: "BaseDrop | Send Crypto via Link",
+    description: "Lock funds in escrow on Base, share a link. Recipient claims directly to their wallet.",
     url: "https://basedrop-protocol.vercel.app",
     siteName: "BaseDrop",
     images: [
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         url: "https://basedrop-protocol.vercel.app/og-image.png",
         width: 1200,
         height: 630,
-        alt: "BaseDrop - The Perfect Link",
+        alt: "BaseDrop - Crypto Payment Links on Base",
       },
     ],
     locale: "en_US",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "BaseDrop | Send Crypto via Link",
-    description: "The easiest way to send cryptocurrency on Base. Safe, fast, and social.",
+    description: "Lock funds in escrow on Base, share a link. Recipient claims directly to their wallet.",
     creator: "@BaseDrop",
     images: ["https://basedrop-protocol.vercel.app/og-image.png"],
   },

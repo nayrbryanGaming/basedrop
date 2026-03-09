@@ -168,7 +168,7 @@ export default function ClaimPage() {
                         <Zap className="w-6 h-6 text-blue-500 animate-pulse" />
                     </div>
                 </div>
-                <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-500 animate-pulse">Decrypting Protocol...</p>
+                <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-500 animate-pulse">Loading payment...</p>
             </div>
         );
     }
@@ -184,29 +184,29 @@ export default function ClaimPage() {
                                 <div className="w-24 h-24 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto ring-2 ring-amber-500/20 shadow-2xl">
                                     <AlertCircle className="w-12 h-12 text-amber-500" />
                                 </div>
-                                <h1 className="text-4xl font-black italic tracking-tighter gradient-text">LINK EXPIRED</h1>
-                                <p className="text-slate-400 max-w-md mx-auto font-medium">This payment protocol has timed out. The funds have been returned to the original sender.</p>
+                                <h1 className="text-4xl font-black italic tracking-tighter gradient-text">Link Expired</h1>
+                                <p className="text-slate-400 max-w-md mx-auto font-medium">This payment link has passed its expiry date. The sender can reclaim the funds.</p>
                             </>
                         ) : errorType === 'claimed' ? (
                             <>
                                 <div className="w-24 h-24 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto ring-2 ring-blue-500/20 shadow-2xl">
                                     <CheckCircle className="w-12 h-12 text-blue-500" />
                                 </div>
-                                <h1 className="text-4xl font-black italic tracking-tighter gradient-text">VAULT SECURED</h1>
-                                <p className="text-slate-400 max-w-md mx-auto font-medium">The funds associated with this link have already been transferred to a recipient wallet.</p>
+                                <h1 className="text-4xl font-black italic tracking-tighter gradient-text">Already Claimed</h1>
+                                <p className="text-slate-400 max-w-md mx-auto font-medium">This payment has already been claimed and the funds transferred to the recipient.</p>
                             </>
                         ) : (
                             <>
                                 <div className="w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center mx-auto ring-2 ring-red-500/20 shadow-2xl">
                                     <ShieldAlert className="w-12 h-12 text-red-500" />
                                 </div>
-                                <h1 className="text-4xl font-black italic tracking-tighter gradient-text">PROTOCOL ERROR</h1>
-                                <p className="text-slate-400 max-w-md mx-auto font-medium">We could not locate this payment record on the Base Sepolia ledger. It may be cancelled or invalid.</p>
+                                <h1 className="text-4xl font-black italic tracking-tighter gradient-text">Payment Not Found</h1>
+                                <p className="text-slate-400 max-w-md mx-auto font-medium">This payment link is invalid or has been cancelled. The funds have been returned to the sender.</p>
                             </>
                         )}
                         <div className="pt-8">
                             <button onClick={() => window.location.href = '/'} className="px-10 py-5 bg-white text-slate-950 font-black rounded-2xl hover:bg-slate-100 transition-all active:scale-95 shadow-2xl">
-                                Return to Protocol
+                                Back to BaseDrop
                             </button>
                         </div>
                     </motion.div>
@@ -275,7 +275,7 @@ export default function ClaimPage() {
                             className="glass p-12 rounded-[3.5rem] space-y-12 relative border border-white/10 shadow-2xl"
                         >
                             <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.3em] shadow-xl whitespace-nowrap">
-                                Incoming Safe Protocol
+                                Incoming Payment
                             </div>
 
                             <div className="text-center space-y-6">
@@ -293,7 +293,7 @@ export default function ClaimPage() {
                                 </div>
                                 <div className="h-px bg-white/5 w-full my-1" />
                                 <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-slate-500">
-                                    <span>Protocol Status</span>
+                                    <span>Status</span>
                                     <span className="text-blue-400 animate-pulse">Ready to release</span>
                                 </div>
                                 {payment.expires_at && (
