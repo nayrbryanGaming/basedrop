@@ -14,11 +14,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "BaseDrop | Ultimate Crypto Experience",
     description: "Send cryptocurrency on Base as easily as a text message. Secure, audited, and optimized.",
-    url: "https://basedrop-mu.vercel.app",
+    url: "https://basedrop-protocol.vercel.app",
     siteName: "BaseDrop",
     images: [
       {
-        url: "https://basedrop-mu.vercel.app/og-image.png",
+        url: "https://basedrop-protocol.vercel.app/og-image.png",
         width: 1200,
         height: 630,
         alt: "BaseDrop - The Perfect Link",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     title: "BaseDrop | Send Crypto via Link",
     description: "The easiest way to send cryptocurrency on Base. Safe, fast, and social.",
     creator: "@BaseDrop",
-    images: ["https://basedrop-mu.vercel.app/og-image.png"],
+    images: ["https://basedrop-protocol.vercel.app/og-image.png"],
   },
   icons: {
     icon: "/logo.png",
