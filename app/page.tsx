@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchChain } from 'wagmi';
+import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchChain, useBalance } from 'wagmi';
 import { baseSepolia } from 'wagmi/chains';
 import { parseEther, parseUnits, keccak256, toHex } from 'viem';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,6 +37,15 @@ export default function HomePage() {
 
   const isCorrectChain = chainId === baseSepolia.id;
   const { writeContractAsync } = useWriteContract();
+
+  const usdcToken = SUPPORTED_TOKENS.find(t => t.symbol === 'USDC')!;
+  const { data: ethBalance } = useBalance({ address, chainId: baseSepolia.id });
+  const { data: usdcBalance } = useBalance({ address, token: usdcToken.address as `0x${string}`, chainId: baseSepolia.id });
+
+  const selectedBalance = token === 'ETH' ? ethBalance : usdcBalance;
+  const selectedDecimals = SUPPORTED_TOKENS.find(t => t.symbol === token)?.decimals ?? 18;
+  const balanceNum = selectedBalance ? parseFloat(selectedBalance.formatted) : null;
+  const isInsufficient = balanceNum !== null && amount !== '' && parseFloat(amount) > balanceNum;
 
   const fetchMyPayments = React.useCallback(async () => {
     if (!address) return;
@@ -88,6 +97,11 @@ export default function HomePage() {
     const numAmount = parseFloat(amount);
     if (isNaN(numAmount) || numAmount <= 0) {
       alert('Please enter a valid positive amount');
+      return;
+    }
+
+    if (isInsufficient) {
+      alert(`Insufficient ${token} balance`);
       return;
     }
 
@@ -241,7 +255,12 @@ export default function HomePage() {
                       placeholder="0.00"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      className="w-full bg-slate-900/60 border border-white/5 rounded-3xl py-6 px-8 text-3xl font-black focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/30 transition-all placeholder:text-slate-700"
+                      className={cn(
+                        "w-full bg-slate-900/60 border rounded-3xl py-6 px-8 text-3xl font-black focus:outline-none focus:ring-4 transition-all placeholder:text-slate-700",
+                        isInsufficient
+                          ? "border-red-500/40 focus:ring-red-500/10 focus:border-red-500/30"
+                          : "border-white/5 focus:ring-blue-500/10 focus:border-blue-500/30"
+                      )}
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2 flex gap-1.5 p-1.5 bg-slate-950/80 rounded-2xl border border-white/5">
                       {SUPPORTED_TOKENS.map((t) => (
@@ -260,6 +279,36 @@ export default function HomePage() {
                       ))}
                     </div>
                   </div>
+
+                  {/* Balance Display */}
+                  {isConnected && isCorrectChain && (
+                    <div className="flex items-center justify-between px-2">
+                      <div className="flex items-center gap-4">
+                        {[ethBalance, usdcBalance].map((bal, i) => {
+                          const sym = i === 0 ? 'ETH' : 'USDC';
+                          const val = bal ? parseFloat(bal.formatted).toFixed(i === 0 ? 4 : 2) : '—';
+                          const isActive = token === sym;
+                          return (
+                            <button key={sym} onClick={() => setToken(sym)} className={cn("flex items-center gap-1.5 transition-all", isActive ? "opacity-100" : "opacity-40 hover:opacity-70")}>
+                              <span className={cn("text-[10px] font-black uppercase tracking-widest", isActive ? "text-blue-400" : "text-slate-500")}>{sym}</span>
+                              <span className={cn("text-xs font-black tabular-nums", isActive ? "text-slate-200" : "text-slate-400")}>{val}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {isInsufficient && (
+                        <span className="text-[10px] font-black uppercase tracking-widest text-red-400 animate-pulse">Insufficient balance</span>
+                      )}
+                      {!isInsufficient && balanceNum !== null && amount !== '' && (
+                        <button
+                          onClick={() => setAmount(balanceNum.toFixed(selectedDecimals === 6 ? 2 : 4))}
+                          className="text-[10px] font-black uppercase tracking-widest text-blue-400 hover:text-blue-300 transition-colors"
+                        >
+                          Max
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">
