@@ -1,4 +1,4 @@
-export const ESCROW_ADDRESS = "0x37C5130124B350f4194fcCD3c9164354D4D787B2";
+export const ESCROW_ADDRESS = (process.env.NEXT_PUBLIC_ESCROW_ADDRESS || "0x59C16998dFc090642EFFdc485c81adAc64d3ef91") as `0x${string}`;
 
 export const ESCROW_ABI = [
     {
