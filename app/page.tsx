@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, usePublicClient, useChainId, useSwitchChain } from 'wagmi';
+import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchChain } from 'wagmi';
 import { baseSepolia } from 'wagmi/chains';
-import { parseEther, parseUnits, keccak256, toHex, encodePacked } from 'viem';
+import { parseEther, parseUnits, keccak256, toHex } from 'viem';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Link as LinkIcon, CheckCircle, AlertCircle, ArrowRight, Wallet, Info, Loader2, Calendar, ShieldCheck, Zap, ExternalLink, Copy, Share2 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';

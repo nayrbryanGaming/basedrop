@@ -3,11 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, usePublicClient, useChainId, useSwitchChain } from 'wagmi';
+import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchChain } from 'wagmi';
 import { baseSepolia } from 'wagmi/chains';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, CheckCircle, AlertCircle, Loader2, Wallet, ArrowRight, Info, Zap, ShieldCheck, ShieldAlert, ExternalLink, RefreshCw } from 'lucide-react';
-import { parseEther, formatUnits } from 'viem';
+import { Download, CheckCircle, AlertCircle, Loader2, Wallet, ArrowRight, Info, Zap, ShieldCheck, ShieldAlert, ExternalLink } from 'lucide-react';
+import { formatUnits } from 'viem';
 import confetti from 'canvas-confetti';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
