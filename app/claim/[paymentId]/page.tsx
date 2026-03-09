@@ -370,9 +370,11 @@ export default function ClaimPage() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-1 pointer-events-auto opacity-30 hover:opacity-100 transition-opacity">
-                        <span className="text-[8px] font-black uppercase tracking-[0.3em] text-slate-500">101% Perfected Protocol</span>
-                        <img src="https://base.org/images/base-logo.svg" alt="Base" className="w-16 h-4 opacity-50 grayscale" />
+                    <div className="flex items-center gap-3 pointer-events-auto opacity-30 hover:opacity-100 transition-opacity">
+                        <span className="text-[8px] font-black uppercase tracking-[0.3em] text-slate-500">BaseDrop v1.0.0</span>
+                        <div className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded-full">
+                            <span className="text-[8px] font-black uppercase tracking-widest text-blue-400">Base Sepolia</span>
+                        </div>
                     </div>
                 </div>
             </footer>

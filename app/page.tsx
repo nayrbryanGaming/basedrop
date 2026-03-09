@@ -204,6 +204,7 @@ export default function HomePage() {
             <Send className="text-white w-5 h-5 -rotate-12" />
           </div>
           <span className="text-2xl font-black tracking-tighter">BASE<span className="text-blue-500">DROP</span></span>
+          <span className="hidden sm:inline-flex px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded-full text-[9px] font-black uppercase tracking-widest text-amber-400">Base Sepolia</span>
         </motion.div>
         <ConnectButton showBalance={false} chainStatus="icon" accountStatus="avatar" />
       </nav>
@@ -543,8 +544,10 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-4 pointer-events-auto opacity-40 hover:opacity-100 transition-opacity">
-            <span className="text-[8px] font-black uppercase tracking-[0.4em] text-slate-600">Protocol v1.1.0-Rescue | Audited by Antigravity Architect</span>
-            <img src="https://base.org/images/base-logo.svg" alt="Base" className="w-12 h-3 grayscale opacity-30" />
+            <span className="text-[8px] font-black uppercase tracking-[0.4em] text-slate-600">BaseDrop v1.0.0 · Base Sepolia Testnet</span>
+            <div className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded-full">
+              <span className="text-[8px] font-black uppercase tracking-widest text-blue-400">TESTNET</span>
+            </div>
           </div>
         </div>
       </footer>
