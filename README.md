@@ -11,7 +11,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 [![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-red?style=for-the-badge)](https://github.com/nayrbryanGaming/basedrop)
 
-**[🌐 Live Demo](https://basedrop-protocol.vercel.app) · [📜 Smart Contract](https://sepolia.basescan.org/address/0x59C16998dFc090642EFFdc485c81adAc64d3ef91) · [🎥 Demo Video](https://youtu.be/Bt_tXOCMZfo)**
+**[🌐 Live Demo](https://basedrop-protocol.vercel.app) · [📜 Smart Contract](https://sepolia.basescan.org/address/0x59C16998dFc090642EFFdc485c81adAc64d3ef91) · [🎥 Demo Video](https://youtu.be/oULFOKEomoU) · [👤 Founder Intro](https://youtube.com/shorts/X621i34V_AA)**
 
 </div>
 
@@ -202,7 +202,9 @@ Demo flow:
 
 ## 🎥 Demo
 
-[Watch the demo video →](https://youtu.be/Bt_tXOCMZfo)
+[Watch the product demo →](https://youtu.be/oULFOKEomoU)
+
+[Founder intro video →](https://youtube.com/shorts/X621i34V_AA)
 
 ---
 
@@ -432,7 +434,7 @@ BaseDrop is fully open source under the MIT License.
 
 Web3 developer focused on blockchain infrastructure and crypto payment systems.
 
-[LinkedIn →](https://linkedin.com/in/bryankwandou)
+[LinkedIn →](https://linkedin.com/in/bryankwandou) · [Intro Video →](https://youtube.com/shorts/X621i34V_AA)
 
 ---
 
@@ -448,7 +450,8 @@ Web3 developer focused on blockchain infrastructure and crypto payment systems.
 |---|---|
 | **Live App** | [basedrop-protocol.vercel.app](https://basedrop-protocol.vercel.app) |
 | **Smart Contract** | [View on Basescan](https://sepolia.basescan.org/address/0x59C16998dFc090642EFFdc485c81adAc64d3ef91) |
-| **Demo Video** | [Watch on YouTube](https://youtu.be/Bt_tXOCMZfo) |
+| **Demo Video** | [Watch on YouTube](https://youtu.be/oULFOKEomoU) |
+| **Founder Intro** | [Watch on YouTube Shorts](https://youtube.com/shorts/X621i34V_AA) |
 | **GitHub** | [nayrbryanGaming/basedrop](https://github.com/nayrbryanGaming/basedrop) |
 | **Founder** | [linkedin.com/in/bryankwandou](https://linkedin.com/in/bryankwandou) |
 
