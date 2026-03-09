@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '../../lib/supabase';
+import { sql, isDbConfigured } from '../../lib/supabase';
 
 function cleanBigInt(obj: any): any {
     if (obj === null || obj === undefined) return obj;
@@ -21,14 +21,14 @@ function safeResponse(data: any, status = 200) {
 }
 
 export async function GET() {
-    if (!isSupabaseConfigured || !supabase) {
-        return safeResponse({ status: 'error', message: 'Environment configuration missing (SUPABASE_URL/KEY).', database: 'unconfigured' }, 503);
+    if (!isDbConfigured) {
+        return safeResponse({ status: 'error', message: 'Environment configuration missing (POSTGRES_URL).', database: 'unconfigured' }, 503);
     }
 
     let dbStatus = 'syncing';
     try {
-        const { error } = await supabase.from('payments').select('count', { count: 'exact', head: true });
-        dbStatus = error ? `error: ${error.message}` : 'connected';
+        await sql`SELECT COUNT(*) FROM payments`;
+        dbStatus = 'connected';
     } catch (e: any) {
         dbStatus = `exception: ${e.message}`;
     }
@@ -37,7 +37,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-    if (!isSupabaseConfigured || !supabase) {
+    if (!isDbConfigured) {
         return safeResponse({ error: 'Database not configured' }, 503);
     }
 
@@ -68,29 +68,25 @@ export async function POST(req: Request) {
     }
 
     try {
-        const { data, error } = await supabase
-            .from('payments')
-            .insert([{
-                payment_id: payment_id.toLowerCase(),
-                amount: amount.toString(),
-                token,
-                sender_wallet: sender_wallet.toLowerCase(),
-                expires_at: expires_at || null,
-                status: 'unclaimed',
-            }])
-            .select();
+        const rows = await sql`
+            INSERT INTO payments (payment_id, amount, token, sender_wallet, expires_at, status)
+            VALUES (
+                ${payment_id.toLowerCase()},
+                ${amount.toString()},
+                ${token},
+                ${sender_wallet.toLowerCase()},
+                ${expires_at || null},
+                'unclaimed'
+            )
+            RETURNING *
+        `;
 
-        if (error) {
-            console.error('[SUPABASE] Insert failed:', error);
-            if (error.code === '23505') {
-                return safeResponse({ error: 'Payment ID already exists' }, 409);
-            }
-            return safeResponse({ error: 'Database error', message: error.message }, 500);
-        }
-
-        return safeResponse({ message: 'Payment created', data: data?.[0] }, 201);
+        return safeResponse({ message: 'Payment created', data: rows[0] }, 201);
     } catch (err: any) {
-        console.error('[SYSTEM] Fatal API exception:', err.message);
+        console.error('[DB] Insert failed:', err.message);
+        if (err.code === '23505') {
+            return safeResponse({ error: 'Payment ID already exists' }, 409);
+        }
         return safeResponse({ error: 'Internal Server Error' }, 500);
     }
 }

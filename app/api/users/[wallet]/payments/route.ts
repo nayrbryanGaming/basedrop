@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '../../../../lib/supabase';
+import { sql, isDbConfigured } from '../../../../lib/supabase';
 
 function cleanBigInt(obj: any): any {
     if (obj === null || obj === undefined) return obj;
@@ -24,7 +24,7 @@ export async function GET(
     req: Request,
     { params }: { params: Promise<{ wallet: string }> }
 ) {
-    if (!isSupabaseConfigured || !supabase) {
+    if (!isDbConfigured) {
         return safeResponse({ error: 'Database not configured' }, 503);
     }
 
@@ -35,18 +35,13 @@ export async function GET(
     }
 
     try {
-        const { data, error } = await supabase
-            .from('payments')
-            .select('*')
-            .eq('sender_wallet', wallet.toLowerCase())
-            .order('created_at', { ascending: false });
+        const rows = await sql`
+            SELECT * FROM payments
+            WHERE sender_wallet = ${wallet.toLowerCase()}
+            ORDER BY created_at DESC
+        `;
 
-        if (error) {
-            console.error('[SUPABASE] Fetch failed:', error);
-            return safeResponse({ error: 'Database error', message: error.message }, 500);
-        }
-
-        return safeResponse(data ?? []);
+        return safeResponse(rows);
     } catch (err: any) {
         console.error('[API] User payments error:', err.message);
         return safeResponse({ error: 'Internal Server Error' }, 500);

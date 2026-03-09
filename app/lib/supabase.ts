@@ -1,19 +1,10 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { neon } from '@neondatabase/serverless';
 
-const supabaseUrl = process.env.SUPABASE_URL ?? '';
+export const isDbConfigured = Boolean(process.env.POSTGRES_URL);
 
-// Server-side API routes use SERVICE_ROLE_KEY to bypass RLS safely.
-// This key is never sent to the browser - it only exists in server env.
-// Falls back to ANON_KEY if SERVICE_ROLE_KEY is not set (requires correct RLS policies).
-const supabaseKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ??
-    process.env.SUPABASE_ANON_KEY ??
-    '';
+// Tagged template SQL function — reads POSTGRES_URL injected by Vercel Storage.
+// Guard with isDbConfigured before every query so errors stay clear.
+export const sql = neon(process.env.POSTGRES_URL || 'postgresql://user:pass@localhost/placeholder');
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseKey);
-
-export const supabase: SupabaseClient | null = isSupabaseConfigured
-    ? createClient(supabaseUrl, supabaseKey, {
-          auth: { persistSession: false, autoRefreshToken: false },
-      })
-    : null;
+// Back-compat aliases so old import paths still work during transition
+export const isSupabaseConfigured = isDbConfigured;

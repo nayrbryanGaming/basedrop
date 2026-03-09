@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '../../../../lib/supabase';
+import { sql, isDbConfigured } from '../../../../lib/supabase';
 
 function cleanBigInt(obj: any): any {
     if (obj === null || obj === undefined) return obj;
@@ -24,7 +24,7 @@ export async function POST(
     req: Request,
     { params }: { params: Promise<{ paymentId: string }> }
 ) {
-    if (!isSupabaseConfigured || !supabase) {
+    if (!isDbConfigured) {
         return safeResponse({ error: 'Database not configured' }, 503);
     }
 
@@ -52,27 +52,21 @@ export async function POST(
     }
 
     try {
-        const { data, error } = await supabase
-            .from('payments')
-            .update({
-                status: 'claimed',
-                receiver_wallet: receiver_wallet.toLowerCase(),
-                tx_hash,
-            })
-            .eq('payment_id', paymentId.toLowerCase())
-            .eq('status', 'unclaimed')
-            .select();
+        const rows = await sql`
+            UPDATE payments
+            SET status = 'claimed',
+                receiver_wallet = ${receiver_wallet.toLowerCase()},
+                tx_hash = ${tx_hash},
+                updated_at = NOW()
+            WHERE payment_id = ${paymentId.toLowerCase()} AND status = 'unclaimed'
+            RETURNING *
+        `;
 
-        if (error) {
-            console.error('[SUPABASE] Claim update failed:', error);
-            return safeResponse({ error: 'Database update failed', message: error.message }, 500);
-        }
-
-        if (!data || data.length === 0) {
+        if (rows.length === 0) {
             return safeResponse({ error: 'Claim rejected: payment already claimed, cancelled, or not found' }, 400);
         }
 
-        return safeResponse({ message: 'Payment claimed', data: data[0] });
+        return safeResponse({ message: 'Payment claimed', data: rows[0] });
     } catch (err: any) {
         console.error('[API] Claim error:', err.message);
         return safeResponse({ error: 'Internal Server Error' }, 500);

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '../../../lib/supabase';
+import { sql, isDbConfigured } from '../../../lib/supabase';
 
 function cleanBigInt(obj: any): any {
     if (obj === null || obj === undefined) return obj;
@@ -24,7 +24,7 @@ export async function GET(
     req: Request,
     { params }: { params: Promise<{ paymentId: string }> }
 ) {
-    if (!isSupabaseConfigured || !supabase) {
+    if (!isDbConfigured) {
         return safeResponse({ error: 'Database not configured' }, 503);
     }
 
@@ -35,17 +35,15 @@ export async function GET(
     }
 
     try {
-        const { data, error } = await supabase
-            .from('payments')
-            .select('*')
-            .eq('payment_id', paymentId.toLowerCase())
-            .single();
+        const rows = await sql`
+            SELECT * FROM payments WHERE payment_id = ${paymentId.toLowerCase()} LIMIT 1
+        `;
 
-        if (error || !data) {
+        if (rows.length === 0) {
             return safeResponse({ error: 'Payment record not found' }, 404);
         }
 
-        return safeResponse(data);
+        return safeResponse(rows[0]);
     } catch (err: any) {
         console.error('[API] GET payment error:', err.message);
         return safeResponse({ error: 'Internal Server Error' }, 500);
